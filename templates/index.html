@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <title>Photo Booth</title>
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
+  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}" charset="utf-8"></script>
+  <script type=text/javascript>
+    var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  </script>
+  <script type=text/javascript>
+    $(function() {
+      $('a#take_picture').bind('click', function() {
+        $.getJSON($SCRIPT_ROOT + '/_take_pictures', function(data) {
+          //$("#result").text(data.result);
+          console.log(data);
+        });
+        return false;
+      });
+    });
+  </script>
+</head>
+  <body>
+    <h1>Take a photo!</h1>
+    <a href="#" id="take_picture">Take Pictures</a>
+  </body>
+</html>
