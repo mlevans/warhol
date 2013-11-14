@@ -9,10 +9,17 @@
   </script>
   <script type=text/javascript>
     $(function() {
-      $('a#take_picture').bind('click', function() {
+      $('div#take_picture').bind('click', function() {
+        
+        $("#take_picture").html("Taking your picture!</br></br><img src='/static/images/1.gif'/>");
+
         $.getJSON($SCRIPT_ROOT + '/_take_pictures', function(data) {
-          //$("#result").text(data.result);
-          console.log(data);
+          $("#take_picture").html("");
+          $("#result").text('All done!');
+          
+          for (var i=0, len=data.pictures.length; i < len; i++) {
+            $('#pictures').append('<img style="width:10%; padding: 10px; " src=' + $SCRIPT_ROOT + '/' + data.pictures[i] + '/>')
+          }
         });
         return false;
       });
@@ -21,6 +28,10 @@
 </head>
   <body>
     <h1>Take a photo!</h1>
-    <a href="#" id="take_picture">Take Pictures</a>
+    <div href="#" id="take_picture" style="color: #0063dc; cursor: pointer;">Take Pictures</div>
+    <br/>
+    <div id="result">&nbsp;</div>
+    <br/>
+    <div id="pictures"></div>
   </body>
 </html>
