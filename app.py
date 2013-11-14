@@ -27,8 +27,10 @@ def take_picture():
     
     if return_code == 0:
         time.sleep(20)
-
-    return jsonify(status='1')
+    
+    picture_list = glob.glob("static/pictures/*.JPG")
+    
+    return jsonify(status='1', pictures=picture_list)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=80)
