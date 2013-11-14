@@ -1,6 +1,9 @@
 from flask import Flask, json, jsonify, g, render_template, request, Response
 
+import time
 import subprocess
+
+import glob
 
 # configuration
 DEBUG = True
@@ -18,9 +21,12 @@ def take_picture():
     # http://pymotw.com/2/subprocess/
     # subprocess.call('gphoto2 --capture-image-and-download --filename "%n.jpg" --interval 5 --frames 2', shell=True)
 
-    subprocess.call('open photobooth.app/', shell=True)
+    return_code = subprocess.call('open photobooth.app/', shell=True)
     
     #subprocess.call(["open","photobooth.app/"])
+    
+    if return_code == 0:
+        time.sleep(20)
 
     return jsonify(status='1')
 
