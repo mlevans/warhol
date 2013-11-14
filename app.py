@@ -15,7 +15,12 @@ def welcome():
 
 @app.route('/_take_pictures')
 def take_picture():
-    subprocess.call('gphoto2 --capture-image-and-download --filename "%n.jpg" --interval 5 --frames 2', shell=True)
+    # http://pymotw.com/2/subprocess/
+    # subprocess.call('gphoto2 --capture-image-and-download --filename "%n.jpg" --interval 5 --frames 2', shell=True)
+
+    subprocess.call('open photobooth.app/', shell=True)
+    
+    #subprocess.call(["open","photobooth.app/"])
 
     return jsonify(status='1')
 
