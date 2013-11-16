@@ -34,6 +34,9 @@ def take_picture():
         time.sleep(20)
 
     picture_list = glob.glob("static/pictures/*.JPG")
+
+    for i, picture in enumerate(picture_list):
+        picture_list[i] = picture_list[i] + '?timestamp=' + str(int(time.time()))
     
     return jsonify(status='0', pictures=picture_list)
 
