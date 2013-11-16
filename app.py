@@ -22,6 +22,8 @@ def home():
 def take_picture():
     # http://pymotw.com/2/subprocess/
     if GPHOTO:
+        # Add a slight delay so that people can adjust themselves for the photos.
+        time.sleep(2)
         return_code = subprocess.call('gphoto2 --capture-image-and-download --filename "static/pictures/%n.JPG" --interval 4 --frames 2', shell=True)
     elif EOSUTILITY:
         return_code = subprocess.call('open photobooth.app/', shell=True)
@@ -35,6 +37,7 @@ def take_picture():
 
     picture_list = glob.glob("static/pictures/*.JPG")
 
+    # Add a timestamp to each image
     for i, picture in enumerate(picture_list):
         picture_list[i] = picture_list[i] + '?timestamp=' + str(int(time.time()))
     
