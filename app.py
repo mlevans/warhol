@@ -39,7 +39,7 @@ def take_pictures():
             pids = subprocess.check_output(["pgrep","gphoto2"])
             split_pids = pids.split('\n')
 
-            if len(split_pids) == 1:
+            if len(split_pids) == 2 and not split_pids[1]:
                 GPHOTO2_PID = split_pids[0]
             else:
                 raise Exception("It seems like there are multiple gphoto processes happening.")
@@ -48,54 +48,51 @@ def take_pictures():
             # Might want to add a delay, but not until we figure out a way to make it faster.
             time.sleep(2)
             for i in range(NUMBER_OF_PHOTOS):
-                subprocess.call('kill -USR1 ' + GPHOTO2_PID)
+                subprocess.call('kill -USR1 ' + GPHOTO2_PID, shell=True)
                 time.sleep(INTERVAL_TIME)
         except subprocess.CalledProcessError, e:
-            print 'Is gphoto running?'
+            print 'Is gPhoto2 running?'
             print e.output
 
     elif EOSUTILITY:
         # Add a slight delay so that people can adjust themselves for the photos.
         time.sleep(2)
-        return_code = subprocess.call('open photobooth.app/', shell=True)
+        subprocess.call('open photobooth.app/', shell=True)
+        # Wait for the photos to finish
+        time.sleep(SHOOT_DURATION)
     
         #subprocess.call(["open","photobooth.app/"])
     else:
         raise Exception("You need to specify a program to automate your camera.")
     
-    if return_code == 0:
-        # Create a timestamp
-        timestamp = str(int(time.time()))
+    # Create a timestamp
+    timestamp = str(int(time.time()))
 
-        # Create a unique directory for the photos.
-        try:
-            os.makedirs("static/pictures/sets/" + timestamp)
-            # os.chmod("static/pictures/sets/" + timestamp, 0777)
-        except OSError as e:
-            print e
+    # Create a unique directory for the photos.
+    try:
+        os.makedirs("static/pictures/sets/" + timestamp)
+        # os.chmod("static/pictures/sets/" + timestamp, 0777)
+    except OSError as e:
+        print e
 
-        # Wait for the photos to finish
-        time.sleep(SHOOT_DURATION)
+    # Get the latest pictures
+    picture_list = glob.glob("static/pictures/*.JPG")
 
-        # Get the latest pictures
-        picture_list = glob.glob("static/pictures/*.JPG")
-
-        # Move the photos
-        for i, picture_path in enumerate(picture_list):
+    # Move the photos
+    for i, picture_path in enumerate(picture_list):
+        if picture_path != "static/pictures/1.JPG":
             shutil.move(picture_list[i], "static/pictures/sets/" + timestamp)
-        
-        new_picture_list = glob.glob("static/pictures/sets/" + timestamp + "/*.JPG")
+    
+    new_picture_list = glob.glob("static/pictures/sets/" + timestamp + "/*.JPG")
 
-        # Add a timestamp to each image
-        if new_picture_list:
-            for i, picture_path in enumerate(new_picture_list):
-                new_picture_list[i] = new_picture_list[i] + '?timestamp=' + timestamp
-        else:
-            raise Exception("No photos with that naming scheme were found!")
-        
-        return jsonify(status='0', pictures=new_picture_list)
+    # Add a timestamp to each image
+    if new_picture_list:
+        for i, picture_path in enumerate(new_picture_list):
+            new_picture_list[i] = new_picture_list[i] + '?timestamp=' + timestamp
     else:
-        raise Exception("Did not get a successful return code.")
+        raise Exception("No photos with that naming scheme were found!")
+    
+    return jsonify(status='0', pictures=new_picture_list)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
