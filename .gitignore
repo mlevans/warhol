@@ -1,4 +1,5 @@
 *.DS_Store
+photobooth.app
 
 # Compiled Python
 *.pyc
