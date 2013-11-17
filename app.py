@@ -1,24 +1,23 @@
 from flask import Flask, json, jsonify, g, render_template, request, Response
-
 import time
 import subprocess
-
 import glob
 import os
 import shutil
 
-# configuration
-DEBUG = True
-SECRET_KEY = 'development key'
-GPHOTO = False
-EOSUTILITY = True
-
-INTERVAL_TIME = 5 # in seconds
-NUMBER_OF_PHOTOS = 4 # Number of photos per shoot
-SHOOT_DURATION = NUMBER_OF_PHOTOS * INTERVAL_TIME
-
+# Create the app
 app = Flask(__name__)
-app.config.from_object(__name__)
+
+# Handle Configuration
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'configuration.py')
+
+#config_path = os.path.abspath(os.environ.get('PHOTOBOOTH_CONFIGURATION', CONFIG_PATH))
+config_path = os.path.abspath(CONFIG_PATH)
+
+if os.path.isfile(config_path):
+    app.config.from_pyfile(config_path)
+else:
+    print 'You need a configuration file.'
 
 @app.route('/')
 def home():
@@ -27,7 +26,7 @@ def home():
 @app.route('/_take_pictures')
 def take_pictures():
     # http://pymotw.com/2/subprocess/
-    if GPHOTO:
+    if app.config['USE_GPHOTO']:
         # FIRST METHOD
         # For capture with 6 second delay
         # return_code = subprocess.call('gphoto2 --capture-image-and-download --filename "static/pictures/%n.JPG" --interval 4 --frames 2', shell=True)
@@ -47,19 +46,19 @@ def take_pictures():
             # Take the photos
             # Might want to add a delay, but not until we figure out a way to make it faster.
             time.sleep(2)
-            for i in range(NUMBER_OF_PHOTOS):
+            for i in range(app.config['NUMBER_OF_PHOTOS']):
                 subprocess.call('kill -USR1 ' + GPHOTO2_PID, shell=True)
-                time.sleep(INTERVAL_TIME)
+                time.sleep(app.config['INTERVAL_TIME'])
         except subprocess.CalledProcessError, e:
             print 'Is gPhoto2 running?'
             print e.output
 
-    elif EOSUTILITY:
+    elif app.config['USE_EOSUTILITY']:
         # Add a slight delay so that people can adjust themselves for the photos.
         time.sleep(2)
         subprocess.call('open photobooth.app/', shell=True)
         # Wait for the photos to finish
-        time.sleep(SHOOT_DURATION)
+        time.sleep(app.config['SHOOT_DURATION'])
     
         #subprocess.call(["open","photobooth.app/"])
     else:
@@ -95,4 +94,5 @@ def take_pictures():
     return jsonify(status='0', pictures=new_picture_list)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80)
+    port = app.config.get('PORT') or 5000
+    app.run(host='0.0.0.0', port=port)

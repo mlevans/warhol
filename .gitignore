@@ -4,3 +4,7 @@ static/pictures/sets/
 
 # Compiled Python
 *.pyc
+*.pyo
+
+# Local configuration file
+configuration.py
