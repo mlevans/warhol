@@ -4,12 +4,18 @@ import time
 import subprocess
 
 import glob
+import os
+import shutil
 
 # configuration
 DEBUG = True
 SECRET_KEY = 'development key'
-GPHOTO = True
-EOSUTILITY = False
+GPHOTO = False
+EOSUTILITY = True
+
+INTERVAL_TIME = 5 # in seconds
+NUMBER_OF_PHOTOS = 4 # Number of photos per shoot
+SHOOT_DURATION = NUMBER_OF_PHOTOS * INTERVAL_TIME
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -19,13 +25,14 @@ def home():
     return render_template('index.html')
 
 @app.route('/_take_pictures')
-def take_picture():
+def take_pictures():
     # http://pymotw.com/2/subprocess/
     if GPHOTO:
-        # Add a slight delay so that people can adjust themselves for the photos.
-        time.sleep(2)
+        # Might want to add a delay, but not until we figure out a way to make it faster.
         return_code = subprocess.call('gphoto2 --capture-image-and-download --filename "static/pictures/%n.JPG" --interval 4 --frames 2', shell=True)
     elif EOSUTILITY:
+        # Add a slight delay so that people can adjust themselves for the photos.
+        time.sleep(2)
         return_code = subprocess.call('open photobooth.app/', shell=True)
     
         #subprocess.call(["open","photobooth.app/"])
@@ -33,15 +40,38 @@ def take_picture():
         raise Exception("You need to specify a program to automate your camera.")
     
     if return_code == 0:
-        time.sleep(20)
+        # Create a timestamp
+        timestamp = str(int(time.time()))
 
-    picture_list = glob.glob("static/pictures/*.JPG")
+        # Create a unique directory for the photos.
+        try:
+            os.makedirs("static/pictures/sets/" + timestamp)
+            # os.chmod("static/pictures/sets/" + timestamp, 0777)
+        except OSError as e:
+            print e
 
-    # Add a timestamp to each image
-    for i, picture in enumerate(picture_list):
-        picture_list[i] = picture_list[i] + '?timestamp=' + str(int(time.time()))
-    
-    return jsonify(status='0', pictures=picture_list)
+        # Wait for the photos to finish
+        time.sleep(SHOOT_DURATION)
+
+        # Get the latest pictures
+        picture_list = glob.glob("static/pictures/*.JPG")
+
+        # Move the photos
+        for i, picture_path in enumerate(picture_list):
+            shutil.move(picture_list[i], "static/pictures/sets/" + timestamp)
+        
+        new_picture_list = glob.glob("static/pictures/sets/" + timestamp + "/*.JPG")
+
+        # Add a timestamp to each image
+        if new_picture_list:
+            for i, picture_path in enumerate(new_picture_list):
+                new_picture_list[i] = new_picture_list[i] + '?timestamp=' + timestamp
+        else:
+            raise Exception("No photos with that naming scheme were found!")
+        
+        return jsonify(status='0', pictures=new_picture_list)
+    else:
+        raise Exception("Did not get a successful return code.")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)

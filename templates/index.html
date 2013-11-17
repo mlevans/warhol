@@ -8,29 +8,47 @@
     var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>
   <script type=text/javascript>
+    // URL shortener
+    // What if this takes an inordinate amount of time?
+    // ajax success, jquery deferred
+    //http://stackoverflow.com/questions/18502593/jquery-mobile-wait-until-getjson-is-finished
+    // done, faily, always
+    // http://flask.pocoo.org/docs/patterns/flashing/
+    // long-polling
     $(function() {
-      $('div#take_picture').bind('click', function() {
-        
-        $("#take_picture").html("Taking your picture!</br></br><img src='/static/images/1.gif'/>");
+      function reset() {
+        window.location = window.location; 
+      }
+
+      $('#take_picture').bind('click', function() {
+        $('#take_picture').unbind('click');
+        $("#take_picture").remove();
+
+        $("#status-container").html("Taking your picture!</br></br><img src='/static/images/1.gif'/>");
 
         $.getJSON($SCRIPT_ROOT + '/_take_pictures', function(data) {
-          $("#take_picture").html("");
-          $("#result").text('All done!');
-          
+          $("#status-container").html('<div>All done!</div><div id="reset">Take some more photos!</div>');
+
+          $('#reset').bind('click', reset);
+
           for (var i=0, len=data.pictures.length; i < len; i++) {
-            $('#pictures').append('<img style="width:10%; padding: 10px; " src=' + $SCRIPT_ROOT + '/' + data.pictures[i] + '/>')
+            $('#pictures').append(
+              '<img class="photos" src=' + $SCRIPT_ROOT + '/' + data.pictures[i] + '/>'
+            );
           }
         });
+
         return false;
+      
       });
     });
   </script>
 </head>
   <body>
     <h1>Take a photo!</h1>
-    <div href="#" id="take_picture" style="color: #0063dc; cursor: pointer;">Take Pictures</div>
+    <div id="take_picture">Take Pictures</div>
     <br/>
-    <div id="result">&nbsp;</div>
+    <div id="status-container">&nbsp;</div>
     <br/>
     <div id="pictures"></div>
   </body>
