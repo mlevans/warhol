@@ -1,5 +1,5 @@
 # app settings
-DEBUG				= True
+DEBUG			    = True
 SECRET_KEY 			= 'Change this'
 PORT 				= 5000
 
