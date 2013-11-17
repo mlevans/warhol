@@ -1,4 +1,6 @@
-from flask import Flask, json, jsonify, g, render_template, request, Response
+#!/usr/bin/env python
+
+from flask import Flask, jsonify, render_template
 import time
 import subprocess
 import glob
@@ -17,7 +19,7 @@ USE_GPHOTO = False
 USE_EOSUTILITY = True
 INTERVAL_TIME = 5 # in seconds
 NUMBER_OF_PHOTOS = 4 # Number of photos per shoot
-SHOOT_DURATION = 21
+SHOOT_DURATION = INTERVAL_TIME * NUMBER_OF_PHOTOS
 
 app.config.from_object(__name__)
 """
@@ -39,7 +41,6 @@ def home():
 
 @app.route('/_take_pictures')
 def take_pictures():
-    # http://pymotw.com/2/subprocess/
     if app.config['USE_GPHOTO']:
         # FIRST METHOD
         # For capture with 6 second delay
@@ -50,22 +51,26 @@ def take_pictures():
         # Get PID
         try:
             pids = subprocess.check_output(["pgrep","gphoto2"])
+
             split_pids = pids.split('\n')
 
             if len(split_pids) == 2 and not split_pids[1]:
                 GPHOTO2_PID = split_pids[0]
             else:
                 raise Exception("It seems like there are multiple gphoto processes happening.")
-
-            # Take the photos
-            # Might want to add a delay, but not until we figure out a way to make it faster.
-            time.sleep(2)
-            for i in range(app.config['NUMBER_OF_PHOTOS']):
-                subprocess.call('kill -USR1 ' + GPHOTO2_PID, shell=True)
-                time.sleep(app.config['INTERVAL_TIME'])
         except subprocess.CalledProcessError, e:
             print 'Is gPhoto2 running?'
             print e.output
+
+        # Take the photos
+
+        # Add a slight delay so that people can adjust themselves for the photos.
+        time.sleep(2)
+        
+        for i in range(app.config['NUMBER_OF_PHOTOS']):
+            #subprocess.call('kill -USR1 ' + GPHOTO2_PID, shell=True)
+            
+            time.sleep(app.config['INTERVAL_TIME'])
 
     elif app.config['USE_EOSUTILITY']:
         # Add a slight delay so that people can adjust themselves for the photos.
@@ -91,11 +96,15 @@ def take_pictures():
     # Get the latest pictures
     picture_list = glob.glob("static/pictures/*.JPG")
 
-    # Move the photos
-    for i, picture_path in enumerate(picture_list):
-        if EOSUTILITY or picture_path != "static/pictures/1.JPG":
-            shutil.move(picture_list[i], "static/pictures/sets/" + timestamp)
+    if picture_list == 0:
+        # Move the photos
+        for i, picture_path in enumerate(picture_list):
+            if EOSUTILITY or picture_path != "static/pictures/1.JPG":
+                shutil.move(picture_list[i], "static/pictures/sets/" + timestamp)
+    else:
+        raise Exception("No photos with that naming scheme were found!")
     
+    # Get a list of the pictures that have been moved
     new_picture_list = glob.glob("static/pictures/sets/" + timestamp + "/*.JPG")
 
     # Add a timestamp to each image
