@@ -1,3 +1,18 @@
-body            { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-a, h1, h2       { text-decoration: none; color: ##0063dc; }
-a:active        { color: #CCC; }
+body { 
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+#take_picture {
+	color: #0063dc;
+	cursor: pointer;
+}
+
+.photos {
+	width: 25%;
+	padding: 10px;
+}
+
+#reset {
+	color: #0063dc;
+	cursor: pointer;
+}
