@@ -8,4 +8,4 @@ USE_GPHOTO 			= False
 USE_EOSUTILITY 		= True
 INTERVAL_TIME 		= 5 # in seconds
 NUMBER_OF_PHOTOS	= 4 # Number of photos per shoot
-SHOOT_DURATION		= NUMBER_OF_PHOTOS * INTERVAL_TIME
+SHOOT_DURATION		= 20
