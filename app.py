@@ -10,8 +10,8 @@ import shutil
 # configuration
 DEBUG = True
 SECRET_KEY = 'development key'
-GPHOTO = False
-EOSUTILITY = True
+GPHOTO = True
+EOSUTILITY = False
 
 INTERVAL_TIME = 5 # in seconds
 NUMBER_OF_PHOTOS = 4 # Number of photos per shoot
@@ -28,8 +28,32 @@ def home():
 def take_pictures():
     # http://pymotw.com/2/subprocess/
     if GPHOTO:
-        # Might want to add a delay, but not until we figure out a way to make it faster.
-        return_code = subprocess.call('gphoto2 --capture-image-and-download --filename "static/pictures/%n.JPG" --interval 4 --frames 2', shell=True)
+        # FIRST METHOD
+        # For capture with 6 second delay
+        #return_code = subprocess.call('gphoto2 --capture-image-and-download --filename "static/pictures/%n.JPG" --interval 4 --frames 2', shell=True)
+        
+        # SECOND METHOD
+        # For instantaneous capture
+        # Get PID
+        try:
+            pids = subprocess.check_output(["pgrep","gphoto2"])
+            split_pids = pids.split('\n')
+
+            if len(split_pids) == 1:
+                GPHOTO2_PID = split_pids[0]
+            else:
+                raise Exception("It seems like there are multiple gphoto processes happening.")
+
+            # Take the photos
+            # Might want to add a delay, but not until we figure out a way to make it faster.
+            time.sleep(2)
+            for i in range(NUMBER_OF_PHOTOS):
+                subprocess.call('kill -USR1 ' + GPHOTO2_PID)
+                time.sleep(INTERVAL_TIME)
+        except subprocess.CalledProcessError, e:
+            print 'Is gphoto running?'
+            print e.output
+
     elif EOSUTILITY:
         # Add a slight delay so that people can adjust themselves for the photos.
         time.sleep(2)
