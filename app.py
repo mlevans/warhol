@@ -10,8 +10,8 @@ import shutil
 # configuration
 DEBUG = True
 SECRET_KEY = 'development key'
-GPHOTO = True
-EOSUTILITY = False
+GPHOTO = False
+EOSUTILITY = True
 
 INTERVAL_TIME = 5 # in seconds
 NUMBER_OF_PHOTOS = 4 # Number of photos per shoot
@@ -30,7 +30,7 @@ def take_pictures():
     if GPHOTO:
         # FIRST METHOD
         # For capture with 6 second delay
-        #return_code = subprocess.call('gphoto2 --capture-image-and-download --filename "static/pictures/%n.JPG" --interval 4 --frames 2', shell=True)
+        # return_code = subprocess.call('gphoto2 --capture-image-and-download --filename "static/pictures/%n.JPG" --interval 4 --frames 2', shell=True)
         
         # SECOND METHOD
         # For instantaneous capture
@@ -80,7 +80,7 @@ def take_pictures():
 
     # Move the photos
     for i, picture_path in enumerate(picture_list):
-        if picture_path != "static/pictures/1.JPG":
+        if EOSUTILITY or picture_path != "static/pictures/1.JPG":
             shutil.move(picture_list[i], "static/pictures/sets/" + timestamp)
     
     new_picture_list = glob.glob("static/pictures/sets/" + timestamp + "/*.JPG")
