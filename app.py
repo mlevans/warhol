@@ -8,7 +8,21 @@ import shutil
 # Create the app
 app = Flask(__name__)
 
-# Handle Configuration
+"""
+# Default Configuration so things work if there's no configuration.py
+DEBUG = True
+SECRET_KEY = 'Change this'
+PORT = 5000
+USE_GPHOTO = False
+USE_EOSUTILITY = True
+INTERVAL_TIME = 5 # in seconds
+NUMBER_OF_PHOTOS = 4 # Number of photos per shoot
+SHOOT_DURATION = 21
+
+app.config.from_object(__name__)
+"""
+
+# Now for the custom configuration
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'configuration.py')
 
 #config_path = os.path.abspath(os.environ.get('PHOTOBOOTH_CONFIGURATION', CONFIG_PATH))
@@ -17,7 +31,7 @@ config_path = os.path.abspath(CONFIG_PATH)
 if os.path.isfile(config_path):
     app.config.from_pyfile(config_path)
 else:
-    print 'You need a configuration file.'
+    print 'You should add a configuration file.'
 
 @app.route('/')
 def home():
