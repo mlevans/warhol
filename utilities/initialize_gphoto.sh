@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Run from root directory
 INITIAL_PICTURE=static/pictures/1.JPG
 
