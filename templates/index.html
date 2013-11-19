@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Photo Booth</title>
+  <!--<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.css') }}">-->
   <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}" charset="utf-8"></script>
   <script type=text/javascript>
@@ -20,22 +21,29 @@
         window.location = window.location; 
       }
 
-      $('#take_picture').bind('click', function() {
-        $('#take_picture').unbind('click');
-        $("#take_picture").remove();
+      $('#status-container').bind('click', function() {
+        $('#status-container').unbind('click');
+        //$("#content").remove();
 
-        $("#status-container").html("Taking your picture!</br></br><img src='/static/images/1.gif'/>");
+        //$("#status-container").html("Taking your picture!</br></br><img src='/static/images/1.gif'/>");
+
+        $("#content #status-container").css({height: "430px", "margin-top":"-215px"});
+        $("#status-container").html("<h1>Taking your picture!</h1><img src='/static/images/1.gif'/>");
+        // change status container and content to     height: 415px;
+        // margin-top: -208px;
 
         $.getJSON($SCRIPT_ROOT + '/_take_pictures', function(data) {
-          $("#status-container").html('<div>All done!</div><div id="reset">Take some more photos!</div>');
-
-          $('#reset').bind('click', reset);
-
+          $("#content #status-container").css({height: "380px", "margin-top":"-190px"});
+          $("#status-container").html('<h1>All done!</h2><div id="pictures"></h1>');
           for (var i=0, len=data.pictures.length; i < len; i++) {
             $('#pictures').append(
               '<img class="photos" src=' + $SCRIPT_ROOT + '/' + data.pictures[i] + '/>'
             );
           }
+
+          $("#status-container").append('<h1 id="reset">Take some more photos!</h1>');
+
+          $('#reset').bind('click', reset);
         });
 
         return false;
@@ -45,11 +53,22 @@
   </script>
 </head>
   <body>
+    <!--
     <h1>Take a photo!</h1>
     <div id="take_picture">Take Pictures</div>
     <br/>
     <div id="status-container">&nbsp;</div>
     <br/>
     <div id="pictures"></div>
+    -->
+    <div id="main-container">
+      <div id="content">
+        <div id="status-container">
+          <h1 id="title">Meet</h1>
+          <img style="width:50%" src='/static/images/a.png'/>
+          <h2 class="lead">Tap anywhere to start taking some photos!</h2>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
