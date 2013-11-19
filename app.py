@@ -4,6 +4,7 @@ from flask import Flask, jsonify, render_template
 import time
 import subprocess
 import glob
+import sys
 import os
 import shutil
 
@@ -62,8 +63,8 @@ def take_pictures():
             else:
                 raise Exception("It seems like there are multiple gphoto processes happening.")
         except subprocess.CalledProcessError, e:
-            print 'Is gPhoto2 running?'
-            print e.output
+            print 'Is gPhoto2 running?', e.output
+            sys.exit(1)
 
         # Take the photos
 
