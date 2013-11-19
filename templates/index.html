@@ -13,9 +13,11 @@
     // What if this takes an inordinate amount of time?
     // ajax success, jquery deferred
     //http://stackoverflow.com/questions/18502593/jquery-mobile-wait-until-getjson-is-finished
-    // done, faily, always
+    // done, fail, always
     // http://flask.pocoo.org/docs/patterns/flashing/
     // long-polling
+    // Initial view:
+    // https://github.com/mbostock/d3/wiki/Force-Layout#wiki-alpha
     $(function() {
       function reset() {
         window.location = window.location; 
@@ -34,7 +36,7 @@
 
         $.getJSON($SCRIPT_ROOT + '/_take_pictures', function(data) {
           $("#content #status-container").css({height: "380px", "margin-top":"-190px"});
-          $("#status-container").html('<h1>All done!</h2><div id="pictures"></h1>');
+          $("#status-container").html('<h1>All done!</h2><div id="pictures"></div>');
           for (var i=0, len=data.pictures.length; i < len; i++) {
             $('#pictures').append(
               '<img class="photos" src=' + $SCRIPT_ROOT + '/' + data.pictures[i] + '/>'
@@ -53,14 +55,6 @@
   </script>
 </head>
   <body>
-    <!--
-    <h1>Take a photo!</h1>
-    <div id="take_picture">Take Pictures</div>
-    <br/>
-    <div id="status-container">&nbsp;</div>
-    <br/>
-    <div id="pictures"></div>
-    -->
     <div id="main-container">
       <div id="content">
         <div id="status-container">
