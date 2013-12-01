@@ -5,6 +5,7 @@
   <!--<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.css') }}">-->
   <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}" charset="utf-8"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/app.js') }}" charset="utf-8"></script>
   <script type=text/javascript>
     var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>
@@ -14,6 +15,7 @@
     // ajax success, jquery deferred
     //http://stackoverflow.com/questions/18502593/jquery-mobile-wait-until-getjson-is-finished
     // done, fail, always
+    // http://net.tutsplus.com/tutorials/javascript-ajax/wrangle-async-tasks-with-jquery-promises/
     // http://flask.pocoo.org/docs/patterns/flashing/
     // long-polling
     // Initial view:
@@ -34,6 +36,7 @@
         // change status container and content to     height: 415px;
         // margin-top: -208px;
 
+        /*
         $.getJSON($SCRIPT_ROOT + '/_take_pictures', function(data) {
           $("#content #status-container").css({height: "380px", "margin-top":"-190px"});
           $("#status-container").html('<h1>All done!</h2><div id="pictures"></div>');
@@ -47,6 +50,9 @@
 
           $('#reset').bind('click', reset);
         });
+        */
+
+        take_photos();
 
         return false;
       
@@ -58,8 +64,8 @@
     <div id="main-container">
       <div id="content">
         <div id="status-container">
-          <h1 id="title">Meet</h1>
-          <img style="width:50%" src='/static/images/a.png'/>
+          <h1 id="title">Meet Warhol</h1>
+          <img style="width:50%" src='/static/images/warhol.png'/>
           <h2 class="lead">Tap anywhere to start taking some photos!</h2>
         </div>
       </div>

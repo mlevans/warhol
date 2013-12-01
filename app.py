@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 import time
 import subprocess
 import glob
@@ -39,6 +39,34 @@ else:
 @app.route('/')
 def home():
     return render_template('index.html')
+
+@app.route('/handle_photo_list')
+def handle_photo_list():
+    timestamp = request.args.get('timestamp')
+
+    # Get the latest pictures
+    picture_list = glob.glob("static/pictures/*.JPG")
+
+    if len(picture_list) > 3:
+        # Move the photos
+        for i, picture_path in enumerate(picture_list):
+            if (app.config['USE_EOSUTILITY'] and not app.config['USE_GPHOTO']) or picture_path != "static/pictures/1.JPG":
+                shutil.move(picture_list[i], "static/pictures/sets/" + timestamp)
+    else:
+        return jsonify(status='1')
+        #raise Exception("No photos with that naming scheme were found!")
+
+    # Get a list of the pictures that have been moved
+    new_picture_list = glob.glob("static/pictures/sets/" + timestamp + "/*.JPG")
+
+    # Add a timestamp to each image
+    if new_picture_list:
+        for i, picture_path in enumerate(new_picture_list):
+            new_picture_list[i] = new_picture_list[i] + '?timestamp=' + timestamp
+        return jsonify(status='0', pictures=new_picture_list)
+    else:
+        #return None
+        raise Exception("No photos with that naming scheme were found!")
 
 @app.route('/_take_pictures')
 def take_pictures():
@@ -79,8 +107,10 @@ def take_pictures():
 
             print 'stdout: ',stdoutdata, 'stderr: ', stderrdata
 
-            time.sleep(app.config['INTERVAL_TIME'])
+            # Wait for the photos to finish
+            # time.sleep(app.config['INTERVAL_TIME'])
     elif app.config['USE_EOSUTILITY']:
+        #time.sleep(60)
         # Add a slight delay so that people can adjust themselves for the photos.
         time.sleep(2)
         
@@ -92,12 +122,15 @@ def take_pictures():
         print 'stdout: ',stdoutdata, 'stderr: ', stderrdata
 
         # Wait for the photos to finish
-        time.sleep(app.config['SHOOT_DURATION'])
+        # time.sleep(app.config['SHOOT_DURATION'])
     else:
         raise Exception("You need to specify a program to automate your camera.")
     
     # Create a timestamp
     timestamp = str(int(time.time()))
+    #g.timestamp = timestamp
+
+    #print 'g timestamp', g.timestamp
 
     # Create a unique directory for the photos.
     try:
@@ -105,29 +138,8 @@ def take_pictures():
         # os.chmod("static/pictures/sets/" + timestamp, 0777)
     except OSError as e:
         print e
-
-    # Get the latest pictures
-    picture_list = glob.glob("static/pictures/*.JPG")
-
-    if picture_list:
-        # Move the photos
-        for i, picture_path in enumerate(picture_list):
-            if (app.config['USE_EOSUTILITY'] and not app.config['USE_GPHOTO']) or picture_path != "static/pictures/1.JPG":
-                shutil.move(picture_list[i], "static/pictures/sets/" + timestamp)
-    else:
-        raise Exception("No photos with that naming scheme were found!")
     
-    # Get a list of the pictures that have been moved
-    new_picture_list = glob.glob("static/pictures/sets/" + timestamp + "/*.JPG")
-
-    # Add a timestamp to each image
-    if new_picture_list:
-        for i, picture_path in enumerate(new_picture_list):
-            new_picture_list[i] = new_picture_list[i] + '?timestamp=' + timestamp
-    else:
-        raise Exception("No photos with that naming scheme were found!")
-    
-    return jsonify(status='0', pictures=new_picture_list)
+    return jsonify(status='0', timestamp=timestamp)
 
 if __name__ == '__main__':
     port = app.config.get('PORT') or 5000
